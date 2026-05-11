@@ -52,7 +52,7 @@ jobs:
 
       version: ${{ needs.package.outputs.container-tag }}
 
-      image-registry: ${{ env.IMAGE_REGISTRY }}
+      image-registry: docker.io
 
       image-repository-path: myorg/apps/${{ github.event.repository.name }}
 
