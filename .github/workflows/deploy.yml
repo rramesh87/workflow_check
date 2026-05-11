@@ -36,6 +36,8 @@ jobs:
 
     needs: [package]
 
+    environment: ${{ matrix.environment }}
+
     strategy:
       matrix:
         environment: ${{ fromJSON(vars.DEPLOY_ENVIRONMENTS || '["dev","qa","staging","prod"]') }}
