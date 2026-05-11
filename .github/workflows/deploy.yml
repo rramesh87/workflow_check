@@ -38,7 +38,7 @@ jobs:
 
     strategy:
       matrix:
-        environment: ${{ fromJSON(vars.DEPLOY_ENVIRONMENTS || env.DEPLOY_ENVIRONMENTS) }}
+        environment: ${{ fromJSON(vars.DEPLOY_ENVIRONMENTS || '["dev","qa","staging","prod"]') }}
 
         exclude: ${{ fromJSON(needs.package.outputs.exclusions || '[]') }}
 
