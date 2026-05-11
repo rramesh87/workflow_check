@@ -1,0 +1,39 @@
+name: Reusable Deploy Workflow
+
+on:
+  workflow_call:
+    inputs:
+      environment:
+        required: true
+        type: string
+
+      version:
+        required: true
+        type: string
+
+      image-registry:
+        required: true
+        type: string
+
+      image-repository-path:
+        required: true
+        type: string
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Make deploy script executable
+        run: chmod +x scripts/deploy.sh
+
+      - name: Run deployment script
+        run: |
+          ./scripts/deploy.sh \
+            "${{ inputs.environment }}" \
+            "${{ inputs.version }}" \
+            "${{ inputs.image-registry }}" \
+            "${{ inputs.image-repository-path }}"
