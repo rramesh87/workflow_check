@@ -1,0 +1,57 @@
+name: Matrix Deployment
+
+on:
+  push:
+    branches:
+      - main
+
+env:
+  IMAGE_REGISTRY: docker.io
+  DEPLOY_ENVIRONMENTS: '["dev","qa","staging","prod"]'
+
+jobs:
+
+  package:
+    runs-on: ubuntu-latest
+
+    outputs:
+      container-tag: ${{ steps.meta.outputs.tag }}
+      exclusions: ${{ steps.exclude.outputs.exclusions }}
+
+    steps:
+      - name: Generate container tag
+        id: meta
+        run: |
+          echo "tag=v1.0.${GITHUB_RUN_NUMBER}" >> $GITHUB_OUTPUT
+
+      - name: Define exclusions
+        id: exclude
+        run: |
+          echo 'exclusions=[{"environment":"qa"}]' >> $GITHUB_OUTPUT
+
+  deploy-others:
+    name: Deploy - ${{ matrix.environment }}
+
+    needs: [package]
+
+    strategy:
+      matrix:
+        environment: ${{ fromJSON(vars.DEPLOY_ENVIRONMENTS || env.DEPLOY_ENVIRONMENTS) }}
+
+        exclude: ${{ fromJSON(needs.package.outputs.exclusions || '[]') }}
+
+      fail-fast: true
+      max-parallel: 1
+
+    uses: ./.github/workflows/reusable-deploy.yml
+
+    with:
+      environment: ${{ matrix.environment }}
+
+      version: ${{ needs.package.outputs.container-tag }}
+
+      image-registry: ${{ env.IMAGE_REGISTRY }}
+
+      image-repository-path: myorg/apps/${{ github.event.repository.name }}
+
+    secrets: inherit
