@@ -4,7 +4,7 @@ on:
   push:
     branches:
       - main
-      
+
   workflow_dispatch:
 
 env:
@@ -36,26 +36,22 @@ jobs:
 
     needs: [package]
 
-    environment: ${{ matrix.environment }}
-
     strategy:
+      fail-fast: true
+      max-parallel: 1
+
       matrix:
         environment: ${{ fromJSON(vars.DEPLOY_ENVIRONMENTS || '["dev","qa","staging","prod"]') }}
 
-        exclude: ${{ fromJSON(needs.package.outputs.exclusions || '[]') }}
-
-      fail-fast: true
-      max-parallel: 1
+        exclude:
+          - environment: qa
 
     uses: ./.github/workflows/reusable-deploy.yml
 
     with:
       environment: ${{ matrix.environment }}
-
       version: ${{ needs.package.outputs.container-tag }}
-
       image-registry: docker.io
-
       image-repository-path: myorg/apps/${{ github.event.repository.name }}
 
     secrets: inherit
